@@ -27,6 +27,7 @@ class ShareViewController: SLComposeServiceViewController {
     
     if let hostAppUrlScheme = Bundle.main.object(forInfoDictionaryKey: HOST_URL_SCHEME_INFO_PLIST_KEY) as? String {
       self.hostAppUrlScheme = hostAppUrlScheme
+      self.didSelectPost()
     } else {
       print("Error: \(NO_INFO_PLIST_URL_SCHEME_ERROR)")
     }
@@ -147,6 +148,8 @@ class ShareViewController: SLComposeServiceViewController {
       
       userDefaults.set([DATA_KEY: url.absoluteString, MIME_TYPE_KEY: "text/plain"],
                        forKey: USER_DEFAULTS_KEY)
+      userDefaults.set(["isLink": true],
+                       forKey: USER_DEFAULTS_EXTRA_DATA_KEY)
       userDefaults.synchronize()
       
       self.openHostApp()
@@ -191,6 +194,8 @@ class ShareViewController: SLComposeServiceViewController {
       
       userDefaults.set([DATA_KEY: filePath.absoluteString,  MIME_TYPE_KEY: mimeType],
                        forKey: USER_DEFAULTS_KEY)
+      userDefaults.set(["fileName": url.lastPathComponent],
+                       forKey: USER_DEFAULTS_EXTRA_DATA_KEY)
       userDefaults.synchronize()
       
       self.openHostApp()
