@@ -47,6 +47,7 @@ public class ShareMenuModule extends ReactContextBaseJavaModule implements Activ
 
   @Nullable
   private ReadableMap extractShared(Intent intent)  {
+    Activity currentActivity = getCurrentActivity();
     String type = intent.getType();
 
     if (type == null) {
@@ -65,8 +66,9 @@ public class ShareMenuModule extends ReactContextBaseJavaModule implements Activ
       }
 
       Uri fileUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
+      String filePath = "file://" + RealPathUtil.getRealPathFromURI(currentActivity, fileUri);
       if (fileUri != null) {
-        data.putString(DATA_KEY, fileUri.toString());
+        data.putString(DATA_KEY, filePath);
         return data;
       }
     } else if (Intent.ACTION_SEND_MULTIPLE.equals(action)) {
