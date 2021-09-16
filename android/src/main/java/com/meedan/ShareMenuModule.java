@@ -76,7 +76,8 @@ public class ShareMenuModule extends ReactContextBaseJavaModule implements Activ
       if (fileUris != null) {
         WritableArray uriArr = Arguments.createArray();
         for (Uri uri : fileUris) {
-          uriArr.pushString(uri.toString());
+          String filePath = "file://" + RealPathUtil.getRealPathFromURI(currentActivity, uri);
+          uriArr.pushString(filePath);
         }
         data.putArray(DATA_KEY, uriArr);
         return data;
