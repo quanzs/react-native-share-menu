@@ -350,6 +350,8 @@ public class RealPathUtil {
                 final int index = cursor.getColumnIndexOrThrow(column);
                 return cursor.getString(index);
             }
+        } catch(Exception e){
+            Log.e("Exception", e.getMessage());
         }
         finally {
             if (cursor != null)
