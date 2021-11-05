@@ -27,10 +27,14 @@ class ShareViewController: SLComposeServiceViewController {
     
     if let hostAppUrlScheme = Bundle.main.object(forInfoDictionaryKey: HOST_URL_SCHEME_INFO_PLIST_KEY) as? String {
       self.hostAppUrlScheme = hostAppUrlScheme
-      self.didSelectPost()
+//      self.didSelectPost()
     } else {
       print("Error: \(NO_INFO_PLIST_URL_SCHEME_ERROR)")
     }
+  }
+  
+  override func viewWillAppear(_ animated: Bool) {
+    self.didSelectPost()
   }
 
     override func isContentValid() -> Bool {
