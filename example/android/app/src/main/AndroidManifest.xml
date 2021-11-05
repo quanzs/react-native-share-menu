@@ -28,6 +28,7 @@
             <data android:mimeType="image/*" />
             <data android:mimeType="application/pdf" />
             <data android:mimeType="audio/*" />
+            <data android:mimeType="video/*" />
             <!-- Add the mime types you want to support -->
         </intent-filter>
       </activity>
