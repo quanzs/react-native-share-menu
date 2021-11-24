@@ -69,7 +69,9 @@ class ShareViewController: SLComposeServiceViewController {
       removeExtraData()
     }
 
-    if provider.isText {
+    if provider.isFileURL {
+      storeFile(withProvider: provider)
+    } else if provider.isText {
       storeText(withProvider: provider)
     } else if provider.isURL {
       storeUrl(withProvider: provider)
