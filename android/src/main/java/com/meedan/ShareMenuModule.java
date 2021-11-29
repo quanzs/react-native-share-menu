@@ -92,7 +92,7 @@ public class ShareMenuModule extends ReactContextBaseJavaModule implements Activ
     Activity currentActivity = getCurrentActivity();
 
     if (currentActivity == null) {
-      successCallback.invoke(null);
+      successCallback.invoke();
       return;
     }
 
@@ -110,6 +110,11 @@ public class ShareMenuModule extends ReactContextBaseJavaModule implements Activ
     }
 
     Intent intent = currentActivity.getIntent();
+
+    if(intent == null) {
+      successCallback.invoke();
+      return;
+    }
     
     ReadableMap shared = extractShared(intent);
     successCallback.invoke(shared);
