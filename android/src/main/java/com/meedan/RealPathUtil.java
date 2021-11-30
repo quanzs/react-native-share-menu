@@ -27,7 +27,7 @@ public class RealPathUtil {
         String selection = null;
         String[] selectionArgs = null;
         // DocumentProvider
-        if (isKitKat ) {
+        if (isKitKat) {
             // ExternalStorageProvider
 
             if (isExternalStorageDocument(uri)) {
@@ -42,7 +42,6 @@ public class RealPathUtil {
                 }
             }
 
-
             // DownloadsProvider
 
             if (isDownloadsDocument(uri)) {
@@ -51,16 +50,17 @@ public class RealPathUtil {
                     final String id;
                     Cursor cursor = null;
                     try {
-                        cursor = context.getContentResolver().query(uri, new String[]{MediaStore.MediaColumns.DISPLAY_NAME}, null, null, null);
+                        cursor = context.getContentResolver().query(uri,
+                                new String[] { MediaStore.MediaColumns.DISPLAY_NAME }, null, null, null);
                         if (cursor != null && cursor.moveToFirst()) {
                             String fileName = cursor.getString(0);
-                            String path = Environment.getExternalStorageDirectory().toString() + "/Download/" + fileName;
+                            String path = Environment.getExternalStorageDirectory().toString() + "/Download/"
+                                    + fileName;
                             if (!TextUtils.isEmpty(path)) {
                                 return path;
                             }
                         }
-                    }
-                    finally {
+                    } finally {
                         if (cursor != null)
                             cursor.close();
                     }
@@ -69,26 +69,24 @@ public class RealPathUtil {
                         if (id.startsWith("raw:")) {
                             return id.replaceFirst("raw:", "");
                         }
-                        String[] contentUriPrefixesToTry = new String[]{
+                        String[] contentUriPrefixesToTry = new String[] {
                                 "content://downloads/public_downloads",
                                 "content://downloads/my_downloads"
                         };
                         for (String contentUriPrefix : contentUriPrefixesToTry) {
                             try {
-                                final Uri contentUri = ContentUris.withAppendedId(Uri.parse(contentUriPrefix), Long.valueOf(id));
-
+                                final Uri contentUri = ContentUris.withAppendedId(Uri.parse(contentUriPrefix),
+                                        Long.valueOf(id));
 
                                 return getDataColumn(context, contentUri, null, null);
                             } catch (NumberFormatException e) {
-                                //In Android 8 and Android P the id is not a number
+                                // In Android 8 and Android P the id is not a number
                                 return uri.getPath().replaceFirst("^/document/raw:", "").replaceFirst("^raw:", "");
                             }
                         }
 
-
                     }
-                }
-                else {
+                } else {
                     final String id = DocumentsContract.getDocumentId(uri);
 
                     if (id.startsWith("raw:")) {
@@ -97,8 +95,7 @@ public class RealPathUtil {
                     try {
                         contentUri = ContentUris.withAppendedId(
                                 Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
-                    }
-                    catch (NumberFormatException e) {
+                    } catch (NumberFormatException e) {
                         e.printStackTrace();
                     }
                     if (contentUri != null) {
@@ -107,7 +104,6 @@ public class RealPathUtil {
                     }
                 }
             }
-
 
             // MediaProvider
             if (isMediaDocument(uri)) {
@@ -125,8 +121,7 @@ public class RealPathUtil {
                     contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
                 }
                 selection = "_id=?";
-                selectionArgs = new String[]{split[1]};
-
+                selectionArgs = new String[] { split[1] };
 
                 return getDataColumn(context, contentUri, selection,
                         selectionArgs);
@@ -136,10 +131,9 @@ public class RealPathUtil {
                 return getDriveFilePath(uri, context);
             }
 
-            if(isWhatsAppFile(uri)){
+            if (isWhatsAppFile(uri)) {
                 return getFilePathForWhatsApp(uri, context);
             }
-
 
             if ("content".equalsIgnoreCase(uri.getScheme())) {
 
@@ -149,15 +143,12 @@ public class RealPathUtil {
                 if (isGoogleDriveUri(uri)) {
                     return getDriveFilePath(uri, context);
                 }
-                if( Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
-                {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 
                     // return getFilePathFromURI(context,uri);
-                    return copyFileToInternalStorage(uri,"userfiles", context);
+                    return copyFileToInternalStorage(uri, "userfiles", context);
                     // return getRealPathFromURI(context,uri);
-                }
-                else
-                {
+                } else {
                     return getDataColumn(context, uri, null, null);
                 }
 
@@ -165,10 +156,9 @@ public class RealPathUtil {
             if ("file".equalsIgnoreCase(uri.getScheme())) {
                 return uri.getPath();
             }
-        }
-        else {
+        } else {
 
-            if(isWhatsAppFile(uri)){
+            if (isWhatsAppFile(uri)) {
                 return getFilePathForWhatsApp(uri, context);
             }
 
@@ -190,9 +180,6 @@ public class RealPathUtil {
             }
         }
 
-
-
-
         return null;
     }
 
@@ -209,7 +196,8 @@ public class RealPathUtil {
 
         // on my Sony devices (4.4.4 & 5.1.1), `type` is a dynamic string
         // something like "71F8-2C0A", some kind of unique id per storage
-        // don't know any API that can get the root path of that storage based on its id.
+        // don't know any API that can get the root path of that storage based on its
+        // id.
         //
         // so no "primary" type, but let the check here for other devices
         if ("primary".equalsIgnoreCase(type)) {
@@ -219,11 +207,13 @@ public class RealPathUtil {
             }
         }
 
-        // Environment.isExternalStorageRemovable() is `true` for external and internal storage
+        // Environment.isExternalStorageRemovable() is `true` for external and internal
+        // storage
         // so we cannot relay on it.
         //
         // instead, for each possible path, check if file exists
-        // we'll start with secondary storage as this could be our (physically) removable sd card
+        // we'll start with secondary storage as this could be our (physically)
+        // removable sd card
         fullPath = System.getenv("SECONDARY_STORAGE") + relativePath;
         if (fileExists(fullPath)) {
             return fullPath;
@@ -242,9 +232,9 @@ public class RealPathUtil {
         Cursor returnCursor = context.getContentResolver().query(returnUri, null, null, null, null);
         /*
          * Get the column indexes of the data in the Cursor,
-         *     * move to the first row in the Cursor, get the data,
-         *     * and display it.
-         * */
+         * * move to the first row in the Cursor, get the data,
+         * * and display it.
+         */
         int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
         int sizeIndex = returnCursor.getColumnIndex(OpenableColumns.SIZE);
         returnCursor.moveToFirst();
@@ -258,7 +248,7 @@ public class RealPathUtil {
             int maxBufferSize = 1 * 1024 * 1024;
             int bytesAvailable = inputStream.available();
 
-            //int bufferSize = 1024;
+            // int bufferSize = 1024;
             int bufferSize = Math.min(bytesAvailable, maxBufferSize);
 
             final byte[] buffers = new byte[bufferSize];
@@ -278,37 +268,37 @@ public class RealPathUtil {
 
     /***
      * Used for Android Q+
+     * 
      * @param uri
-     * @param newDirName if you want to create a directory, you can set this variable
+     * @param newDirName if you want to create a directory, you can set this
+     *                   variable
      * @return
      */
-    private static String copyFileToInternalStorage(Uri uri,String newDirName, Context context) {
+    private static String copyFileToInternalStorage(Uri uri, String newDirName, Context context) {
         Uri returnUri = uri;
 
-        Cursor returnCursor = context.getContentResolver().query(returnUri, new String[]{
-                OpenableColumns.DISPLAY_NAME,OpenableColumns.SIZE
+        Cursor returnCursor = context.getContentResolver().query(returnUri, new String[] {
+                OpenableColumns.DISPLAY_NAME, OpenableColumns.SIZE
         }, null, null, null);
-
 
         /*
          * Get the column indexes of the data in the Cursor,
-         *     * move to the first row in the Cursor, get the data,
-         *     * and display it.
-         * */
+         * * move to the first row in the Cursor, get the data,
+         * * and display it.
+         */
         int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
         int sizeIndex = returnCursor.getColumnIndex(OpenableColumns.SIZE);
         returnCursor.moveToFirst();
         String name = (returnCursor.getString(nameIndex));
 
         File output;
-        if(!newDirName.equals("")) {
+        if (!newDirName.equals("")) {
             File dir = new File(context.getFilesDir() + "/" + newDirName);
             if (!dir.exists()) {
                 dir.mkdir();
             }
             output = new File(context.getFilesDir() + "/" + newDirName + "/" + name);
-        }
-        else{
+        } else {
             output = new File(context.getFilesDir() + "/" + name);
         }
         try {
@@ -324,8 +314,7 @@ public class RealPathUtil {
             inputStream.close();
             outputStream.close();
 
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
 
             Log.e("Exception", e.getMessage());
         }
@@ -333,14 +322,14 @@ public class RealPathUtil {
         return output.getPath();
     }
 
-    private static String getFilePathForWhatsApp(Uri uri, Context context){
-        return  copyFileToInternalStorage(uri,"whatsapp", context);
+    private static String getFilePathForWhatsApp(Uri uri, Context context) {
+        return copyFileToInternalStorage(uri, "whatsapp", context);
     }
 
     private static String getDataColumn(Context context, Uri uri, String selection, String[] selectionArgs) {
         Cursor cursor = null;
         final String column = "_data";
-        final String[] projection = {column};
+        final String[] projection = { column };
 
         try {
             cursor = context.getContentResolver().query(uri, projection,
@@ -350,10 +339,9 @@ public class RealPathUtil {
                 final int index = cursor.getColumnIndexOrThrow(column);
                 return cursor.getString(index);
             }
-        } catch(Exception e){
+        } catch (Exception e) {
             Log.e("Exception", e.getMessage());
-        }
-        finally {
+        } finally {
             if (cursor != null)
                 cursor.close();
         }
@@ -377,13 +365,13 @@ public class RealPathUtil {
         return "com.google.android.apps.photos.content".equals(uri.getAuthority());
     }
 
-    public static boolean isWhatsAppFile(Uri uri){
+    public static boolean isWhatsAppFile(Uri uri) {
         return "com.whatsapp.provider.media".equals(uri.getAuthority());
     }
 
     private static boolean isGoogleDriveUri(Uri uri) {
-        return "com.google.android.apps.docs.storage".equals(uri.getAuthority()) || "com.google.android.apps.docs.storage.legacy".equals(uri.getAuthority());
+        return "com.google.android.apps.docs.storage".equals(uri.getAuthority())
+                || "com.google.android.apps.docs.storage.legacy".equals(uri.getAuthority());
     }
-
 
 }
