@@ -46,7 +46,7 @@ public class ShareMenuModule extends ReactContextBaseJavaModule implements Activ
   }
 
   @Nullable
-  private ReadableMap extractShared(Intent intent)  {
+  private ReadableMap extractShared(Intent intent) {
     Activity currentActivity = getCurrentActivity();
     String type = intent.getType();
 
@@ -103,6 +103,14 @@ public class ShareMenuModule extends ReactContextBaseJavaModule implements Activ
       currentActivity.startActivity(newIntent);
 
       ReadableMap shared = extractShared(newIntent);
+      // if data is shared from onmail its self
+      Uri fileUri = newIntent.getParcelableExtra(Intent.EXTRA_STREAM);
+      if (fileUri != null && fileUri.getAuthority() != null && fileUri.getAuthority().contains("com.easilydo.onmail")) {
+        successCallback.invoke(shared);
+        clearSharedText();
+        return;
+      }
+
       successCallback.invoke(shared);
       clearSharedText();
       currentActivity.finish();
@@ -111,11 +119,11 @@ public class ShareMenuModule extends ReactContextBaseJavaModule implements Activ
 
     Intent intent = currentActivity.getIntent();
 
-    if(intent == null) {
+    if (intent == null) {
       successCallback.invoke();
       return;
     }
-    
+
     ReadableMap shared = extractShared(intent);
     successCallback.invoke(shared);
     clearSharedText();
@@ -127,14 +135,16 @@ public class ShareMenuModule extends ReactContextBaseJavaModule implements Activ
     }
 
     mReactContext
-            .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-            .emit(NEW_SHARE_EVENT, shared);
+        .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+        .emit(NEW_SHARE_EVENT, shared);
   }
 
   public void clearSharedText() {
     Activity mActivity = getCurrentActivity();
-    
-    if(mActivity == null) { return; }
+
+    if (mActivity == null) {
+      return;
+    }
 
     Intent intent = mActivity.getIntent();
     String type = intent.getType();
@@ -163,6 +173,12 @@ public class ShareMenuModule extends ReactContextBaseJavaModule implements Activ
     Activity currentActivity = getCurrentActivity();
 
     if (currentActivity == null) {
+      return;
+    }
+
+    // if data is shared from onmail its self
+    Uri fileUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
+    if (fileUri != null && fileUri.getAuthority() != null && fileUri.getAuthority().contains("com.easilydo.onmail")) {
       return;
     }
 
