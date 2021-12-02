@@ -32,6 +32,10 @@ export default {
     ShareMenu.getSharedText(callback);
   },
   addNewShareListener(callback) {
+    const count = EventEmitter.listenerCount(NEW_SHARE_EVENT_NAME);
+    if (count > 0) {
+      EventEmitter.removeAllListeners(NEW_SHARE_EVENT_NAME);
+    }
     const subscription = EventEmitter.addListener(
       NEW_SHARE_EVENT_NAME,
       callback

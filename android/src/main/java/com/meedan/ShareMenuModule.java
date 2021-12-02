@@ -15,6 +15,7 @@ import com.facebook.react.modules.core.DeviceEventManagerModule;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -105,7 +106,8 @@ public class ShareMenuModule extends ReactContextBaseJavaModule implements Activ
       ReadableMap shared = extractShared(newIntent);
       // if data is shared from onmail its self
       Uri fileUri = newIntent.getParcelableExtra(Intent.EXTRA_STREAM);
-      if (fileUri != null && fileUri.getAuthority() != null && fileUri.getAuthority().contains("com.easilydo.onmail")) {
+      if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q && fileUri != null && fileUri.getAuthority() != null
+              && fileUri.getAuthority().contains("com.easilydo.onmail")) {
         successCallback.invoke(shared);
         clearSharedText();
         return;
@@ -135,8 +137,8 @@ public class ShareMenuModule extends ReactContextBaseJavaModule implements Activ
     }
 
     mReactContext
-        .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-        .emit(NEW_SHARE_EVENT, shared);
+            .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+            .emit(NEW_SHARE_EVENT, shared);
   }
 
   public void clearSharedText() {
@@ -178,7 +180,8 @@ public class ShareMenuModule extends ReactContextBaseJavaModule implements Activ
 
     // if data is shared from onmail its self
     Uri fileUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
-    if (fileUri != null && fileUri.getAuthority() != null && fileUri.getAuthority().contains("com.easilydo.onmail")) {
+    if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q && fileUri != null && fileUri.getAuthority() != null
+            && fileUri.getAuthority().contains("com.easilydo.onmail")) {
       return;
     }
 
