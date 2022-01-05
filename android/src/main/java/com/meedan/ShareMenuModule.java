@@ -180,7 +180,7 @@ public class ShareMenuModule extends ReactContextBaseJavaModule implements Activ
 
     // if data is shared from onmail its self
     Uri fileUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
-    if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q && fileUri != null && fileUri.getAuthority() != null
+    if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q && fileUri != null && fileUri.getAuthority() != null
             && fileUri.getAuthority().contains("com.easilydo.onmail")) {
       return;
     }
