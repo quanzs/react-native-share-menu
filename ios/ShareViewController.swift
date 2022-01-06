@@ -282,7 +282,61 @@ class ShareViewController: SLComposeServiceViewController {
     }
   }
   
+  func storeImage(withProvider provider: NSItemProvider) {
+    provider.loadItem(forTypeIdentifier: kUTTypeData as String, options: nil) { (data, error) in
+      guard (error == nil) else {
+        self.exit(withError: error.debugDescription)
+        return
+      }
+      guard let url = data as? URL else {
+        self.exit(withError: COULD_NOT_FIND_IMG_ERROR)
+        return
+      }
+      guard let hostAppId = self.hostAppId else {
+        self.exit(withError: NO_INFO_PLIST_INDENTIFIER_ERROR)
+        return
+      }
+      guard let userDefaults = UserDefaults(suiteName: "group.\(hostAppId)") else {
+        self.exit(withError: NO_APP_GROUP_ERROR)
+        return
+      }
+      guard let groupFileManagerContainer = FileManager.default
+              .containerURL(forSecurityApplicationGroupIdentifier: "group.\(hostAppId)")
+      else {
+        self.exit(withError: NO_APP_GROUP_ERROR)
+        return
+      }
+      
+      var mimeType = url.extractMimeType()
+      let fileExtension = url.pathExtension
+      let fileName = UUID().uuidString
+      let filePath = groupFileManagerContainer
+        .appendingPathComponent("\(fileName).\(fileExtension)")
+      
+      guard self.moveFileToDisk(from: url, to: filePath) else {
+        self.exit(withError: COULD_NOT_SAVE_FILE_ERROR)
+        return
+      }
+      
+      if (mimeType == "") {
+        mimeType = MimeType(ext: fileExtension)
+      }
+      
+      userDefaults.set([DATA_KEY: filePath.absoluteString,  MIME_TYPE_KEY: mimeType],
+                       forKey: USER_DEFAULTS_KEY)
+      userDefaults.set(["fileName": url.lastPathComponent],
+                       forKey: USER_DEFAULTS_EXTRA_DATA_KEY)
+      userDefaults.synchronize()
+      
+      self.openHostApp()
+    }
+  }
+  
   func storeFile(withProvider provider: NSItemProvider) {
+    if provider.hasItemConformingToTypeIdentifier(kUTTypeImage as String) {
+      self.storeImage(withProvider: provider)
+      return
+    }
     provider.loadItem(forTypeIdentifier: kUTTypeFileURL as String, options: nil) { (data, error) in
       guard (error == nil) else {
         self.exit(withError: error.debugDescription)
