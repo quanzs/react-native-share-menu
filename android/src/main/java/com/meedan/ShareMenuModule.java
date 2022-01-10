@@ -97,15 +97,23 @@ public class ShareMenuModule extends ReactContextBaseJavaModule implements Activ
       return;
     }
 
+    Intent intent = currentActivity.getIntent();
+
     // If this isn't the root activity then make sure it is
     if (!currentActivity.isTaskRoot()) {
-      Intent newIntent = new Intent(currentActivity.getIntent());
+      Intent newIntent = new Intent(intent);
+      Uri fileUri = newIntent.getParcelableExtra(Intent.EXTRA_STREAM);
+      ReadableMap shared = extractShared(newIntent);
+      if(fileUri != null && fileUri.getAuthority() != null && fileUri.getAuthority().contains("com.microsoft.office")) {
+        successCallback.invoke(shared);
+        clearSharedText();
+        return;
+      }
+
       newIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
       currentActivity.startActivity(newIntent);
 
-      ReadableMap shared = extractShared(newIntent);
       // if data is shared from onmail its self
-      Uri fileUri = newIntent.getParcelableExtra(Intent.EXTRA_STREAM);
       if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q && fileUri != null && fileUri.getAuthority() != null
               && fileUri.getAuthority().contains("com.easilydo.onmail")) {
         successCallback.invoke(shared);
@@ -118,8 +126,6 @@ public class ShareMenuModule extends ReactContextBaseJavaModule implements Activ
       currentActivity.finish();
       return;
     }
-
-    Intent intent = currentActivity.getIntent();
 
     if (intent == null) {
       successCallback.invoke();
