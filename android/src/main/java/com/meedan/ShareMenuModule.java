@@ -67,8 +67,8 @@ public class ShareMenuModule extends ReactContextBaseJavaModule implements Activ
       }
 
       Uri fileUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
-      String filePath = "file://" + RealPathUtil.getRealPathFromURI(currentActivity, fileUri);
       if (fileUri != null) {
+        String filePath = "file://" + RealPathUtil.getRealPathFromURI(currentActivity, fileUri);
         data.putString(DATA_KEY, filePath);
         return data;
       }
@@ -77,8 +77,10 @@ public class ShareMenuModule extends ReactContextBaseJavaModule implements Activ
       if (fileUris != null) {
         WritableArray uriArr = Arguments.createArray();
         for (Uri uri : fileUris) {
-          String filePath = "file://" + RealPathUtil.getRealPathFromURI(currentActivity, uri);
-          uriArr.pushString(filePath);
+          if (uri != null) {
+            String filePath = "file://" + RealPathUtil.getRealPathFromURI(currentActivity, uri);
+            uriArr.pushString(filePath);
+          }
         }
         data.putArray(DATA_KEY, uriArr);
         return data;
@@ -104,14 +106,8 @@ public class ShareMenuModule extends ReactContextBaseJavaModule implements Activ
       Intent newIntent = new Intent(intent);
       Uri fileUri = newIntent.getParcelableExtra(Intent.EXTRA_STREAM);
       ReadableMap shared = extractShared(newIntent);
-      if(fileUri != null && fileUri.getAuthority() != null && fileUri.getAuthority().contains("com.microsoft.office")) {
-        successCallback.invoke(shared);
-        clearSharedText();
-        return;
-      }
-
-      newIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-      currentActivity.startActivity(newIntent);
+//      newIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//      currentActivity.startActivity(newIntent);
 
       // if data is shared from onmail its self
       if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q && fileUri != null && fileUri.getAuthority() != null
@@ -123,7 +119,7 @@ public class ShareMenuModule extends ReactContextBaseJavaModule implements Activ
 
       successCallback.invoke(shared);
       clearSharedText();
-      currentActivity.finish();
+//      currentActivity.finish();
       return;
     }
 
