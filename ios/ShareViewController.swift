@@ -282,7 +282,7 @@ class ShareViewController: SLComposeServiceViewController {
     }
   }
   
-  func storeImage(withProvider provider: NSItemProvider) {
+  func storeMedia(withProvider provider: NSItemProvider) {
     provider.loadItem(forTypeIdentifier: kUTTypeData as String, options: nil) { (data, error) in
       guard (error == nil) else {
         self.exit(withError: error.debugDescription)
@@ -333,10 +333,11 @@ class ShareViewController: SLComposeServiceViewController {
   }
   
   func storeFile(withProvider provider: NSItemProvider) {
-    if provider.hasItemConformingToTypeIdentifier(kUTTypeImage as String) {
-      self.storeImage(withProvider: provider)
+    if provider.hasItemConformingToTypeIdentifier(kUTTypeImage as String) || provider.hasItemConformingToTypeIdentifier(kUTTypeMovie as String) {
+      self.storeMedia(withProvider: provider)
       return
     }
+
     provider.loadItem(forTypeIdentifier: kUTTypeFileURL as String, options: nil) { (data, error) in
       guard (error == nil) else {
         self.exit(withError: error.debugDescription)
