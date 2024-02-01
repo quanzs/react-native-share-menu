@@ -288,10 +288,6 @@ class ShareViewController: SLComposeServiceViewController {
         self.exit(withError: error.debugDescription)
         return
       }
-      guard let url = data as? URL else {
-        self.exit(withError: COULD_NOT_FIND_IMG_ERROR)
-        return
-      }
       guard let hostAppId = self.hostAppId else {
         self.exit(withError: NO_INFO_PLIST_INDENTIFIER_ERROR)
         return
@@ -307,28 +303,52 @@ class ShareViewController: SLComposeServiceViewController {
         return
       }
       
-      var mimeType = url.extractMimeType()
-      let fileExtension = url.pathExtension
-      let fileName = UUID().uuidString
-      let filePath = groupFileManagerContainer
-        .appendingPathComponent("\(fileName).\(fileExtension)")
-      
-      guard self.moveFileToDisk(from: url, to: filePath) else {
-        self.exit(withError: COULD_NOT_SAVE_FILE_ERROR)
+      if let uiImage = data as? UIImage {
+        let fileExtension = "png"
+        let fileName = UUID().uuidString
+        let filePath = groupFileManagerContainer
+          .appendingPathComponent("\(fileName).\(fileExtension)")
+        
+        guard let rawData = uiImage.pngData() else {
+          self.exit(withError: "Error while getting raw data")
+          return
+        }
+
+        guard FileManager.default.createFile(atPath: filePath.path, contents: rawData) else {
+          self.exit(withError: "Error while createFile")
+          return
+        }
+
+        userDefaults.set([DATA_KEY: filePath.absoluteString,  MIME_TYPE_KEY: "image/png"],
+                        forKey: USER_DEFAULTS_KEY)
+        userDefaults.synchronize()
+        self.openHostApp()
+      } else if let url = data as? URL {
+        var mimeType = url.extractMimeType()
+        let fileExtension = url.pathExtension
+        let fileName = UUID().uuidString
+        let filePath = groupFileManagerContainer
+          .appendingPathComponent("\(fileName).\(fileExtension)")
+
+        guard self.moveFileToDisk(from: url, to: filePath) else {
+          self.exit(withError: COULD_NOT_SAVE_FILE_ERROR)
+          return
+        }
+
+        if (mimeType == "") {
+          mimeType = MimeType(ext: fileExtension)
+        }
+
+        userDefaults.set([DATA_KEY: filePath.absoluteString,  MIME_TYPE_KEY: mimeType],
+                         forKey: USER_DEFAULTS_KEY)
+        userDefaults.set(["fileName": url.lastPathComponent],
+                         forKey: USER_DEFAULTS_EXTRA_DATA_KEY)
+        userDefaults.synchronize()
+        self.openHostApp()
+      } else {
+        self.exit(withError: COULD_NOT_FIND_IMG_ERROR)
         return
       }
-      
-      if (mimeType == "") {
-        mimeType = MimeType(ext: fileExtension)
-      }
-      
-      userDefaults.set([DATA_KEY: filePath.absoluteString,  MIME_TYPE_KEY: mimeType],
-                       forKey: USER_DEFAULTS_KEY)
-      userDefaults.set(["fileName": url.lastPathComponent],
-                       forKey: USER_DEFAULTS_EXTRA_DATA_KEY)
-      userDefaults.synchronize()
-      
-      self.openHostApp()
     }
   }
   
